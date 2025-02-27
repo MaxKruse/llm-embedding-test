@@ -7,6 +7,11 @@ import {
 } from "openai/resources/index.mjs";
 import "../util/env";
 import { ChatCompletionTool } from "openai/src/resources/index.js";
+import {
+  CurrencyConverterConfig,
+  CurrencyConverterTool,
+} from "./tools/currency";
+import { useContextManager } from "./useContextManager";
 
 configDotenv();
 
@@ -19,7 +24,7 @@ const SYSTEM_MESSAGE_KEEP_USING_TOOLS =
   "You are a helpful assistant that utilizes tools as they become apparent to help the user with their questions. You always prefer to use tools to process queries than to do your own thinking or math on the topic at hand. You have the ability to solve intermediate steps with little to no tools, but you are always able to use tools at a later point." as const;
 
 const SYSTEM_MESSAGE_DONT_KEEP_USING_TOOLS =
-  "You are a helpful assistant that utilizes tools to help the user with their questions. You always prefer to use tools to process queries than to do your own thinking or math on the topic at hand. Once you cannot give more help without more tool usage, inform the user of your intermediate success and wait for a response." as const;
+  "You are a helpful assistant that utilizes tools to help the user with their questions. You always prefer to use tools to process queries than to do your own thinking or math on the topic at hand. You only ever use one tool at a time." as const;
 
 interface PromptConfig {
   tools: Array<ChatCompletionTool>;
@@ -39,36 +44,8 @@ interface PromptError {
   errorMessage: string;
 }
 
-function buildMessages(
-  config: PromptConfig
-): Array<ChatCompletionMessageParam> {
-  const messages: Array<ChatCompletionMessageParam> = [];
-
-  // add system message depending on config
-
-  if (config.keepUsingTools) {
-    messages.push({
-      role: "system",
-      content: SYSTEM_MESSAGE_KEEP_USING_TOOLS,
-    });
-  } else {
-    messages.push({
-      role: "system",
-      content: SYSTEM_MESSAGE_DONT_KEEP_USING_TOOLS,
-    });
-  }
-
-  // add user question
-  messages.push({
-    role: "user",
-    content: config.question,
-  });
-
-  return messages;
-}
-
 async function reuseContextRepeatTools(
-  firstResponse: ChatCompletion,
+  context: Array<ChatCompletionMessageParam>,
   config: PromptConfig
 ): Promise<ChatCompletion> {
   const result: ChatCompletion = {
@@ -87,31 +64,135 @@ function generateID(): string {
 }
 
 export function useOpenAI() {
-  const Prompt = async (config: PromptConfig): Promise<PromptResult> => {
+  const Prompt = async (
+    config: PromptConfig
+  ): Promise<PromptResult | PromptError> => {
     // build the messages
-    const messages = buildMessages(config);
-    const id = generateID();
+    const { addChatCompletionMessage, addMessageParam, messages } =
+      useContextManager();
 
-    const firstResponse = await openai.chat.completions.create({
-      messages: messages,
-      model: process.env.OPENAI_LLM_MODEL,
-      tools: config.tools,
+    if (config.keepUsingTools) {
+      addMessageParam({
+        role: "system",
+        content: SYSTEM_MESSAGE_KEEP_USING_TOOLS,
+      });
+    } else {
+      addMessageParam({
+        role: "system",
+        content: SYSTEM_MESSAGE_DONT_KEEP_USING_TOOLS,
+      });
+    }
+
+    // add user question
+    addMessageParam({
+      role: "user",
+      content: config.question,
     });
 
-    // todo: error checks
+    const id = generateID();
 
-    if (!config.keepUsingTools) {
-      // early return
+    const create = async () => {
+      const response = await openai.chat.completions
+        .create({
+          messages: messages,
+          model: process.env.OPENAI_LLM_MODEL,
+          tools: config.tools,
+          temperature: 0.0,
+        })
+        .catch((err) => {
+          return {
+            id: id,
+            errorMessage: err,
+          } as PromptError;
+        });
+
+      if (!("errorMessage" in response)) {
+        addChatCompletionMessage(response);
+      }
+
+      return response;
+    };
+
+    // todo: error checks
+    const firstResponse = await create();
+    if ("errorMessage" in firstResponse) {
+      return firstResponse;
+    }
+
+    // todo: check for tool use
+    const tool_choices = firstResponse.choices[0].message.tool_calls;
+    if (tool_choices === undefined || tool_choices.length === 0) {
+      // todo figure it out;
       return {
-        id: id,
-        stats: firstResponse.usage!,
-        question: config.question,
-        answer: firstResponse.choices[0].message.content!,
+        answer: "",
+        id: "",
+        question: "",
+        stats: {
+          completion_tokens: 0,
+          prompt_tokens: 0,
+          total_tokens: 0,
+        },
       };
     }
 
-    // TODO loop for tool usage
-    const finalResponse = await reuseContextRepeatTools(firstResponse, config);
+    const reuseToolOnce = async () => {
+      for (const tool_choice of tool_choices) {
+        // check for the tool choice name, and act on it
+        switch (tool_choice.function.name) {
+          case "currency_converter_euro_usd":
+            const args = JSON.parse(
+              tool_choice.function.arguments
+            ) as CurrencyConverterConfig;
+
+            const result = CurrencyConverterTool(args);
+
+            // give the model the tool response
+            addMessageParam({
+              role: "tool",
+              content: JSON.stringify(result),
+              tool_call_id: tool_choice.id,
+            });
+
+            break;
+          default:
+            console.log(
+              "Tried to use a tool we dont know about:",
+              tool_choice.function.name
+            );
+            break;
+        }
+      }
+
+      return await create();
+    };
+
+    const reuseTools = async () => {
+      let newToolFound = true;
+      let latest;
+
+      while (newToolFound) {
+        const newResponse = await reuseToolOnce();
+        if ("errorMessage" in newResponse) {
+          latest = newResponse;
+          return latest as PromptError;
+        }
+
+        newToolFound = !!newResponse.choices[0].message.tool_calls?.length;
+        latest = newResponse;
+      }
+
+      return latest as ChatCompletion;
+    };
+
+    // todo: make a function for keep using tools
+
+    let finalResponse = config.keepUsingTools
+      ? await reuseToolOnce()
+      : await reuseTools();
+
+    if ("errorMessage" in finalResponse) {
+      return finalResponse;
+    }
 
     return {
       id: id,
