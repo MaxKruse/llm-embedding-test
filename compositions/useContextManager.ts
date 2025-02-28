@@ -15,6 +15,6 @@ export function useContextManager() {
   return {
     addChatCompletionMessage,
     addMessageParam,
-    messages,
+    messages: messages as ReadonlyArray<ChatCompletionMessageParam>,
   };
 }

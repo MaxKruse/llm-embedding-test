@@ -10,8 +10,8 @@ import { ChatCompletionTool } from "openai/src/resources/index.js";
 import {
   CurrencyConverterConfig,
   CurrencyConverterTool,
-} from "./tools/currency";
-import { useContextManager } from "./useContextManager";
+} from "./tools/currency.js";
+import { useContextManager } from "./useContextManager.js";
 
 configDotenv();
 
@@ -94,8 +94,8 @@ export function useOpenAI() {
     const create = async () => {
       const response = await openai.chat.completions
         .create({
-          messages: messages,
-          model: process.env.OPENAI_LLM_MODEL,
+          messages: messages as ChatCompletionMessageParam[],
+          model: process.env.OPENAI_LLM_MODEL!,
           tools: config.tools,
           temperature: 0.0,
         })

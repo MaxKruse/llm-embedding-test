@@ -1,7 +1,7 @@
 // mock code
 
-import { useOpenAI } from "./compositions/useOpenAI";
-import { useTools } from "./compositions/useTools";
+import { useOpenAI } from "./compositions/useOpenAI.js";
+import { useTools } from "./compositions/useTools.js";
 
 const openai = useOpenAI();
 const tools = useTools();
