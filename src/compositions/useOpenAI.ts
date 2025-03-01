@@ -207,20 +207,18 @@ export function useOpenAI() {
     };
   };
 
-  const TestEmbedding = async (
-    configIndex: KnowledgeIndexConfig,
-    configSearch: KnowledgeIndexConfig
-  ) => {
-    const knowledgeTool = await IndexKnowledgeTool(configIndex, openai);
+  const AddTestEmbedding = async (config: KnowledgeIndexConfig) => {
+    const knowledgeTool = await IndexKnowledgeTool(config, openai);
+  };
 
-    console.log("Worked? ", knowledgeTool);
-
-    const resp = await RetrieveKnowledgeTool(configSearch, openai);
+  const SearchTestEmbedding = async (config: KnowledgeIndexConfig) => {
+    const resp = await RetrieveKnowledgeTool(config, openai);
     return resp;
   };
 
   return {
     Prompt,
-    TestEmbedding,
+    AddTestEmbedding,
+    SearchTestEmbedding,
   };
 }

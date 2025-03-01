@@ -14,6 +14,8 @@ import { KnowledgeIndexConfig } from "./tools/knowledge.js";
 const MAX_EMBEDDING_TOKENS = 512;
 const VECTOR_SIZE = 768;
 
+const COLLECTION_NAME = "knowledge";
+
 const chromaClient = new ChromaClient();
 
 export interface AddEmbeddingParams {
@@ -33,10 +35,11 @@ export async function useChromaDB() {
 
   // ensure collection
   const collection = await chromaClient.getOrCreateCollection({
-    name: "knowledge",
+    name: COLLECTION_NAME,
     metadata: {
       name: "UserKnowledge",
       description: "Holds knowledge about the user.",
+      "hnsw:space": "cosine",
     },
   });
 
@@ -61,8 +64,6 @@ export async function useChromaDB() {
     }
 
     await collection.add(chromaData);
-
-    console.log("Added to chroma data: ", JSON.stringify(chromaData));
   };
 
   const searchEmbedding = async (
@@ -75,21 +76,32 @@ export async function useChromaDB() {
     });
 
     const queried = await collection.query({
-      nResults: 1,
+      nResults: 4,
       // @ts-ignore
-      include: ["documents"],
+      include: ["documents", "ids", "distances"],
       queryEmbeddings: embeddingData.data.map((e) => e.embedding),
     });
 
+    let resultStrings: Array<string> = [];
+
     // find the lowest distance, and return the document with that index
     if (queried.documents) {
-      return queried.documents.toString();
+      for (let i = 0; queried.ids.length; i++) {
+        const currentId = queried.ids!.at(i);
+        const currentDistance = queried.distances!.at(i);
+        const currentDocument = queried.documents!.at(i);
+
+        const tempString = `document ${currentId} with distance ${currentDistance} contains information: ${currentDocument}`;
+
+        resultStrings.push(tempString);
+      }
     }
 
-    return "";
+    return resultStrings.join(" | ");
   };
 
   const reset = async () => {
+    await chromaClient.deleteCollection({ name: COLLECTION_NAME });
     await chromaClient.reset();
   };
 
