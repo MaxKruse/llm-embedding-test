@@ -12,6 +12,11 @@ import {
   CurrencyConverterTool,
 } from "./tools/currency.js";
 import { useContextManager } from "./useContextManager.js";
+import {
+  IndexKnowledgeTool,
+  KnowledgeIndexConfig,
+  RetrieveKnowledgeTool,
+} from "./tools/knowledge.js";
 
 configDotenv();
 
@@ -202,7 +207,20 @@ export function useOpenAI() {
     };
   };
 
+  const TestEmbedding = async (
+    configIndex: KnowledgeIndexConfig,
+    configSearch: KnowledgeIndexConfig
+  ) => {
+    const knowledgeTool = await IndexKnowledgeTool(configIndex, openai);
+
+    console.log("Worked? ", knowledgeTool);
+
+    const resp = await RetrieveKnowledgeTool(configSearch, openai);
+    return resp;
+  };
+
   return {
     Prompt,
+    TestEmbedding,
   };
 }
