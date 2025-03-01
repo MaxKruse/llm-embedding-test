@@ -142,29 +142,37 @@ export function useOpenAI() {
 
     const reuseToolOnce = async () => {
       for (const tool_choice of tool_choices) {
+        const args = JSON.parse(tool_choice.function.arguments);
+
         // check for the tool choice name, and act on it
-        switch (tool_choice.function.name) {
-          case "currency_converter_euro_usd":
-            const args = JSON.parse(
-              tool_choice.function.arguments
-            ) as CurrencyConverterConfig;
+        if (tool_choice.function.name === "currency_converter_euro_usd") {
+          const args = JSON.parse(
+            tool_choice.function.arguments
+          ) as CurrencyConverterConfig;
+          const result = CurrencyConverterTool(args);
 
-            const result = CurrencyConverterTool(args);
+          // give the model the tool response
+          addMessageParam({
+            role: "tool",
+            content: JSON.stringify(result),
+            tool_call_id: tool_choice.id,
+          });
+        }
 
-            // give the model the tool response
-            addMessageParam({
-              role: "tool",
-              content: JSON.stringify(result),
-              tool_call_id: tool_choice.id,
-            });
+        if (tool_choice.function.name === "index_knowledge") {
+          const args = JSON.parse(
+            tool_choice.function.arguments
+          ) as KnowledgeIndexConfig;
 
-            break;
-          default:
-            console.log(
-              "Tried to use a tool we dont know about:",
-              tool_choice.function.name
-            );
-            break;
+          const result = await IndexKnowledgeTool(args, openai);
+
+          addMessageParam({
+            role: "tool",
+            tool_call_id: tool_choice.id,
+            content: JSON.stringify({
+              success: result,
+            }),
+          });
         }
       }
 
@@ -208,7 +216,7 @@ export function useOpenAI() {
   };
 
   const AddTestEmbedding = async (config: KnowledgeIndexConfig) => {
-    const knowledgeTool = await IndexKnowledgeTool(config, openai);
+    await IndexKnowledgeTool(config, openai);
   };
 
   const SearchTestEmbedding = async (config: KnowledgeIndexConfig) => {
