@@ -4,11 +4,10 @@ import { useTools } from "./compositions/useTools.js";
 
 const openai = useOpenAI();
 
-const add = false;
-
 const args = process.argv.slice(2);
 
-if (args.length == 0 || args[0] == "add") {
+// populate chromadb
+if (args.length === 1 && args[0] == "add") {
   await openai.AddTestEmbedding({
     information: "The user's CPU Specs are: Ryzen 7 5800X3D.",
     metaData: {
@@ -129,23 +128,14 @@ if (args.length == 0 || args[0] == "add") {
   });
 
   console.log("All embedded");
-} else {
-  const response = await openai.SearchTestEmbedding({
-    information: "The user uses a software to livestream.",
-  });
-
-  console.log(response);
 }
-
-/*
 
 const tools = useTools();
 const response = await openai.Prompt({
   tools: tools,
   question:
-    "Can you convert 56.23€ to $ for me? And once you have done that, can you convert $60 to euro please.",
+    "I like to play osu!, an indie rhythm game. Also, can you convert 56.23€ to $ for me?.",
   keepUsingTools: false,
 });
 
 console.log(response);
-*/
