@@ -129,13 +129,21 @@ if (args.length === 1 && args[0] == "add") {
 
   console.log("All embedded");
 }
-
-const tools = useTools();
-const response = await openai.Prompt({
-  tools: tools,
-  question:
-    "I like to play osu!, an indie rhythm game. Also, can you convert 56.23€ to $ for me?.",
-  keepUsingTools: false,
-});
-
-console.log(response);
+if (args.length === 0) {
+  const tools = useTools();
+  const response = await openai.Prompt({
+    tools: tools,
+    question: "What games do i like to play?",
+    keepUsingTools: true,
+  });
+  console.log(response);
+} else {
+  // good case
+  const tools = useTools();
+  const response = await openai.Prompt({
+    tools: tools,
+    question: args.at(0) as string,
+    keepUsingTools: true,
+  });
+  console.log(response);
+}

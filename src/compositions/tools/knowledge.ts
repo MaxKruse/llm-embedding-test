@@ -10,7 +10,7 @@ export interface KnowledgeIndexConfig {
 }
 
 export interface RetrievedKnowledge {
-  information: string;
+  information: Array<string>;
 }
 
 export async function IndexKnowledgeTool(
@@ -51,8 +51,9 @@ export function knowledge(): Array<ChatCompletionTool> {
   tools.push({
     type: "function",
     function: {
-      name: "index_knowledge",
-      description: "Remembers a piece of information about the user.",
+      name: "remember_knowledge",
+      description:
+        "Remembers a previously learned piece of information about the user. This has to be used before learning something new. Always.",
       strict: true,
       parameters: {
         type: "object",
@@ -60,6 +61,26 @@ export function knowledge(): Array<ChatCompletionTool> {
           information: {
             type: "string",
             description: "The piece of information to remember about the user.",
+          },
+        },
+        required: ["information"],
+        additionalProperties: false,
+      },
+    },
+  });
+
+  tools.push({
+    type: "function",
+    function: {
+      name: "learn_knowledge",
+      description: "Learns a new piece of information about the user.",
+      strict: true,
+      parameters: {
+        type: "object",
+        properties: {
+          information: {
+            type: "string",
+            description: "The piece of information to learn about the user.",
           },
           metaData: {
             type: "object",

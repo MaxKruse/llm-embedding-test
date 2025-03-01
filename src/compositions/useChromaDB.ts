@@ -72,13 +72,11 @@ export async function useChromaDB() {
   const searchEmbedding = async (
     config: KnowledgeIndexConfig,
     openaiClient: OpenAI
-  ): Promise<string> => {
+  ): Promise<Array<string>> => {
     const embeddingData = await openaiClient.embeddings.create({
       model: process.env.OPENAI_EMBEDDING_MODEL!,
       input: config.information,
     });
-
-    console.log("going to query");
 
     const queried = await collection.query({
       nResults: 4,
@@ -87,14 +85,11 @@ export async function useChromaDB() {
       queryEmbeddings: embeddingData.data.map((e) => e.embedding),
     });
 
-    console.log("queried data.");
     await writeFile(
       "queried.json",
       JSON.stringify(queried, null, 2),
       {},
-      () => {
-        console.log("in callback");
-      }
+      () => {}
     );
 
     let resultStrings: Array<string> = [];
@@ -118,7 +113,7 @@ export async function useChromaDB() {
       }
     }
 
-    return resultStrings.join(" | ");
+    return resultStrings;
   };
 
   const reset = async () => {
