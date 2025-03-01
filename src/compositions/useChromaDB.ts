@@ -10,6 +10,9 @@ import "../util/env.js";
 import { Embedding, Embeddings } from "openai/resources/embeddings.mjs";
 import { KnowledgeIndexConfig } from "./tools/knowledge.js";
 
+import "fs";
+import { writeFile } from "fs";
+
 // values for granite-embedding-278m-multilingual
 const MAX_EMBEDDING_TOKENS = 512;
 const VECTOR_SIZE = 768;
@@ -75,25 +78,43 @@ export async function useChromaDB() {
       input: config.information,
     });
 
+    console.log("going to query");
+
     const queried = await collection.query({
       nResults: 4,
       // @ts-ignore
-      include: ["documents", "ids", "distances"],
+      includes: ["documents", "distances"],
       queryEmbeddings: embeddingData.data.map((e) => e.embedding),
     });
+
+    console.log("queried data.");
+    await writeFile(
+      "queried.json",
+      JSON.stringify(queried, null, 2),
+      {},
+      () => {
+        console.log("in callback");
+      }
+    );
 
     let resultStrings: Array<string> = [];
 
     // find the lowest distance, and return the document with that index
     if (queried.documents) {
-      for (let i = 0; queried.ids.length; i++) {
-        const currentId = queried.ids!.at(i);
-        const currentDistance = queried.distances!.at(i);
-        const currentDocument = queried.documents!.at(i);
+      for (let i = 0; i < queried.ids.length; i++) {
+        const currentSearchIds = queried.ids.at(i);
+        const currentSearchDistances = queried.distances!.at(i);
+        const currentSearchDocuments = queried.documents!.at(i);
 
-        const tempString = `document ${currentId} with distance ${currentDistance} contains information: ${currentDocument}`;
+        for (let j = 0; j < currentSearchIds!.length; j++) {
+          const currentId = currentSearchIds?.at(j);
+          const currentDistance = currentSearchDistances?.at(j);
+          const currentDocument = currentSearchDocuments?.at(j);
 
-        resultStrings.push(tempString);
+          const tempString = `document ${currentId} with distance ${currentDistance} contains information: ${currentDocument}`;
+
+          resultStrings.push(tempString);
+        }
       }
     }
 

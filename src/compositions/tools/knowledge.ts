@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { AddEmbeddingParams, useChromaDB } from "../useChromaDB.js";
 import { Metadata } from "chromadb";
+import { v4 as uuidv4 } from "uuid";
 
 export interface KnowledgeIndexConfig {
   information: string;
@@ -19,7 +20,7 @@ export async function IndexKnowledgeTool(
 
   const chroma = await useChromaDB();
   const embeddingData: AddEmbeddingParams = {
-    id: "information",
+    id: uuidv4(),
     data: config.information,
     metadata: config.metaData,
   };
