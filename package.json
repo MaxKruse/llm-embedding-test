@@ -5,7 +5,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "npx tsx src/main.ts"
+    "setup": "docker run -e ALLOW_RESET=TRUE --name chroma -d -p 8000:8000 chromadb/chroma",
+    "start": "npx tsx src/main.ts",
+    "cleanup": "docker stop chroma && docker rm chroma"
   },
   "keywords": [],
   "author": "",
