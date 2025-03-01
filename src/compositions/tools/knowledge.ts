@@ -38,8 +38,10 @@ export async function RetrieveKnowledgeTool(
   // todo: search in chromadb for knowledge based on the config, if we cant find it return false, prompting the llm to save the data with the next tool call.
 
   const chroma = await useChromaDB();
+  console.log("Looking for data:", config.information);
 
   const data = await chroma!.searchEmbedding(config, openaiClient);
+  console.log("Found data:", data);
   return {
     information: data,
   };

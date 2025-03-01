@@ -14,12 +14,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@tuesdaycrowd/sentence-transformers": "^1.0.1",
+    "@huggingface/transformers": "^3.3.3",
     "chromadb": "^1.10.4",
     "chromadb-default-embed": "^2.13.2",
     "dotenv": "^16.4.7",
     "openai": "^4.85.4",
     "typescript": "^5.7.3",
     "uuid": "^11.1.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "onnxruntime-node",
+      "protobufjs",
+      "sharp"
+    ]
   }
 }
