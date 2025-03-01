@@ -26,10 +26,10 @@ const openai = new OpenAI({
 });
 
 const SYSTEM_MESSAGE_KEEP_USING_TOOLS =
-  "You are a helpful assistant that utilizes tools as they become apparent to help the user with their questions. You always prefer to use tools to process queries than to do your own thinking or math on the topic at hand. You have the ability to solve intermediate steps with little to no tools, but you are always able to use tools at a later point." as const;
+  "You are a helpful assistant that utilizes tools as they become apparent to help the user with their questions. You always prefer to use tools to process queries than to do your own thinking or math on the topic at hand. You have the ability to solve intermediate steps with little to no tools, but you are always able to use tools at a later point. Before trying to index new knowledge, assess if we already know of it." as const;
 
 const SYSTEM_MESSAGE_DONT_KEEP_USING_TOOLS =
-  "You are a helpful assistant that utilizes tools to help the user with their questions. You always prefer to use tools to process queries than to do your own thinking or math on the topic at hand. You only ever use one tool at a time." as const;
+  "You are a helpful assistant that utilizes tools to help the user with their questions. You always prefer to use tools to process queries than to do your own thinking or math on the topic at hand. You only ever use one tool at a time. Before trying to index new knowledge, assess if we already know of it." as const;
 
 interface PromptConfig {
   tools: Array<ChatCompletionTool>;
