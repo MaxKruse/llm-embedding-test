@@ -26,10 +26,10 @@ const openai = new OpenAI({
 });
 
 const SYSTEM_MESSAGE_KEEP_USING_TOOLS =
-  "You are a helpful english speaking assistant that utilizes tools as they become apparent to help the user with their questions. You always prefer to use tools to process queries than to do your own thinking or math on the topic at hand. You have the ability to solve intermediate steps with little to no tools, but you are always able to use tools at a later point. Before trying to the question of the user, always check yourself first if you already remember something about them. For example, if they ask about their Hardware, you should try to remember anything regarding their CPU, RAM, GPU etc.. You do this by calling your tool for remembering knowledge. You never ask followup questions and only answer as needed. You alwas format your responses in markdown for easier readability, give the response a heading and bullet points for the answers. Strictly answer the question provided and omit any information you may have that is not useful." as const;
+  "IMPORTANT: You only talk and think in english. You are a helpful english speaking assistant that utilizes tools as they become apparent to help the user with their questions. You always prefer to use tools to process queries than to do your own thinking or math on the topic at hand. You have the ability to solve intermediate steps with little to no tools, but you are always able to use tools at a later point. Before trying to the question of the user, always check yourself first if you already remember something about them. For example, if they ask about their Hardware, you should try to remember anything regarding their CPU, RAM, GPU etc.. You do this by calling your tool for remembering knowledge. You never ask followup questions and only answer as needed. In case you do want to learn something from the user, always format it like 'The user ...'. Also always query your knowledge with the same 'The user ...'. If you already remember a piece of information of the user, make sure to not re-learn it. This is crucial. You alwas format your responses in markdown for easier readability, give the response a heading and bullet points for the answers. Strictly answer the question provided and omit any information you may have that is not useful." as const;
 
 const SYSTEM_MESSAGE_DONT_KEEP_USING_TOOLS =
-  "You are a helpful english speaking assistant that utilizes tools to help the user with their questions. You always prefer to use tools to process queries than to do your own thinking or math on the topic at hand. You only ever use one tool at a time. You alwas format your responses in markdown for easier readability, give the response a heading and bullet points for the answers. Strictly answer the question provided and omit any information you may have that is not useful." as const;
+  "IMPORTANT: You only talk and think in english.  You are a helpful english speaking assistant that utilizes tools to help the user with their questions. You always prefer to use tools to process queries than to do your own thinking or math on the topic at hand. You only ever use one tool at a time. You alwas format your responses in markdown for easier readability, give the response a heading and bullet points for the answers. Strictly answer the question provided and omit any information you may have that is not useful." as const;
 
 interface PromptConfig {
   tools: Array<ChatCompletionTool>;
@@ -47,21 +47,6 @@ interface PromptResult {
 interface PromptError {
   id: string;
   errorMessage: string;
-}
-
-async function reuseContextRepeatTools(
-  context: Array<ChatCompletionMessageParam>,
-  config: PromptConfig
-): Promise<ChatCompletion> {
-  const result: ChatCompletion = {
-    choices: [],
-    created: 0,
-    id: "",
-    model: "",
-    object: "chat.completion",
-  };
-
-  return result;
 }
 
 function generateID(): string {
@@ -102,7 +87,7 @@ export function useOpenAI() {
           messages: messages as ChatCompletionMessageParam[],
           model: process.env.OPENAI_LLM_MODEL!,
           tools: config.tools,
-          temperature: 0.0,
+          temperature: 0.4,
         })
         .catch((err) => {
           return {

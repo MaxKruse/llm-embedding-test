@@ -141,7 +141,7 @@ export async function useChromaDB() {
     });
 
     const queried = await collection.query({
-      nResults: 4,
+      nResults: 10,
       // @ts-ignore
       includes: ["documents", "distances"],
       queryEmbeddings: embeddingData.data.map((e) => e.embedding),
