@@ -60,7 +60,6 @@ async function splitKnowledge(
           id: v4(),
         });
       }
-      console.log("Splitting into new parts: ", splits.length);
 
       for (const newPart of newParts) {
         await keepSplitting(newPart);
@@ -104,9 +103,7 @@ export async function useChromaDB() {
     params: AddEmbeddingParams,
     openaiClient: OpenAI
   ) => {
-    console.log("Before split:", params);
     const allParts = await splitKnowledge(params);
-    console.log("After split:", allParts);
 
     for (const part of allParts) {
       // get embedding from openai
@@ -124,8 +121,6 @@ export async function useChromaDB() {
       if (part.metadata) {
         chromaData.metadatas = [part.metadata];
       }
-
-      console.log("saving:", JSON.stringify(chromaData.documents));
 
       await collection.add(chromaData);
     }
