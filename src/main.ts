@@ -1,6 +1,5 @@
 import inquirer from "inquirer";
 import { useLMStudio } from "./compositions/useLMStudio.js";
-import { useLogger } from "./compositions/useLogger.js";
 
 const lmStudio = await useLMStudio();
 
@@ -14,5 +13,5 @@ while (true) {
   ]);
 
   const resp = await lmStudio.act({ input: input.chat_input });
-  console.log(resp.finalMessage + "\n\n");
+  console.log(resp + "\n\n");
 }

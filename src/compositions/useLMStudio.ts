@@ -92,9 +92,9 @@ export async function useLMStudio() {
       }
     );
 
-    useLogger().info("Last response:", finalMessage);
+    useLogger().info(".act() response:", finalResult);
 
-    return { finalResult, finalMessage };
+    return finalMessage;
   };
 
   const prompt = async (data: PromptData) => {
