@@ -102,7 +102,7 @@ export async function useLMStudio() {
     useLogger().info(".act() response:", finalResult);
     useLogger().debug(
       "Token Count usage:",
-      INSTRUCT_MODEL.countTokens(actChat.toString())
+      await INSTRUCT_MODEL.countTokens(actChat.toString())
     );
 
     return finalMessage;
