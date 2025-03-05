@@ -42,7 +42,7 @@ export const GitCommitTool = tool({
     execSync(GIT_ADD_COMMAND);
     execSync(commitCmd);
 
-    return "Successfully commited changes";
+    return { status: "Successfully commited changes", commitCmd };
   },
 });
 
