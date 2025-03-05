@@ -22,7 +22,14 @@ export const DirectoryListTool = tool({
     });
     useLogger().debug("[DirectoryListTool] listing directory contents", data);
 
-    return data;
+    return data.map((entry) => {
+      return {
+        isFile: entry.isFile(),
+        isDirectory: entry.isDirectory(),
+        name: entry.name,
+        parentPath: entry.parentPath,
+      };
+    });
   },
 });
 
@@ -32,6 +39,6 @@ export const CurrentDirectoryTool = tool({
     "Get the current directory. ALWAYS used before any other file or directory related tools.",
   parameters: {},
   implementation: () => {
-    return process.cwd();
+    return { currentDirectory: process.cwd() };
   },
 });

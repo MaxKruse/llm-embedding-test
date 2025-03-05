@@ -61,10 +61,9 @@ const GIT_PUSH = "git push";
 export const GitPushTool = tool({
   name: "git_push",
   description:
-    "Pushes currently commited, but not yet pushed changes with git.",
+    "Pushes currently commited, but not yet pushed changes with git. This should always be followed up by another git status.",
   parameters: {},
   implementation: () => {
-    execSync(GIT_PUSH);
-    return "Successfully pushed changes";
+    return execSync(GIT_PUSH);
   },
 });

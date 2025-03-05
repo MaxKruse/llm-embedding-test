@@ -40,9 +40,11 @@ export const WriteFileTool = tool({
       ),
   },
   implementation: ({ path, data, overwriteContent }) => {
-    return fs.writeFileSync(path, data, {
+    fs.writeFileSync(path, data, {
       encoding: "utf-8",
       flag: overwriteContent ? "w" : "a",
     });
+
+    return { status: "success", datawritten: data };
   },
 });

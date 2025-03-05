@@ -32,7 +32,13 @@ export const LearnNewInformationTool = tool({
       },
     });
 
-    return "Learned and Saved new information to vector database.";
+    return {
+      status: "Learned and Saved new information to vector database.",
+      data: {
+        information,
+        metaData,
+      },
+    };
   },
 });
 
