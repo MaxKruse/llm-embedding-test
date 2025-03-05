@@ -14,4 +14,5 @@ while (true) {
   ]);
 
   const resp = await lmStudio.act({ input: input.chat_input });
+  console.log(resp.finalMessage + "\n\n");
 }
