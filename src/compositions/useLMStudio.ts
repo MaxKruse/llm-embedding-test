@@ -63,6 +63,8 @@ Do not confuse yourself with the user. The user is a human entity. Speak of the 
 
 When writing git commit messages, never include a list of the modified files in the commit message. Instead, analyze the code changes in the patch view and say what has changed. Also, make sure to escape any unusual characters so that the commit message doesnt break.
 
+If there are a lot of individual changes in a git commit, summarize them as a general theme, instead of addressing everything.
+
 # Additional Information
 
  - Current Day: ${formattedDateTime}
@@ -98,6 +100,10 @@ export async function useLMStudio() {
     );
 
     useLogger().info(".act() response:", finalResult);
+    useLogger().debug(
+      "Token Count usage:",
+      INSTRUCT_MODEL.countTokens(actChat.toString())
+    );
 
     return finalMessage;
   };

@@ -45,7 +45,7 @@ const GIT_STATUS = "git status";
 export const GitStatusTool = tool({
   name: "git_status",
   description:
-    "Gets the current status of the git repository. Should generally be used before any other git actions.",
+    "Gets the current status of the git repository. Should generally be used before git commit and git push.",
   parameters: {},
   implementation: () => {
     return execSync(GIT_STATUS);

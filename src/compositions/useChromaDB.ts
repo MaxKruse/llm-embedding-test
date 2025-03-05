@@ -1,6 +1,5 @@
 import { AddRecordsParams, ChromaClient, Metadata } from "chromadb";
 import { sys } from "typescript";
-import { AutoTokenizer } from "@huggingface/transformers";
 
 import "fs";
 import { writeFile } from "fs";
@@ -11,7 +10,6 @@ import { useLogger } from "./useLogger.js";
 // values for granite-embedding-278m-multilingual
 const MAX_EMBEDDING_TOKENS = 512;
 const VECTOR_SIZE = 768;
-const MODEL_PATH = "ibm-granite/granite-embedding-278m-multilingual";
 
 const COLLECTION_NAME = "knowledge";
 
@@ -22,16 +20,14 @@ async function splitKnowledge(
 ): Promise<Array<EmbeddingParams>> {
   const res: Array<EmbeddingParams> = [];
 
-  const tokenizer = await AutoTokenizer.from_pretrained(MODEL_PATH);
-
-  const sentence_embedding = await tokenizer.encode(config.data);
+  const sentence_embedding = await EMBEDDING_MODEL.tokenize(config.data);
   useLogger().debug("Sentence embedding size", sentence_embedding.length);
 
   if (sentence_embedding.length > MAX_EMBEDDING_TOKENS) {
     // cut up the knowledge
 
     const keepSplitting = async (conf: EmbeddingParams) => {
-      const new_embedding = await tokenizer.encode(config.data);
+      const new_embedding = await EMBEDDING_MODEL.tokenize(config.data);
 
       useLogger().debug(
         "Got new embedding size for the split part",
