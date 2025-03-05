@@ -16,7 +16,7 @@ export const GitDiffTool = tool({
 });
 
 const GIT_ADD_COMMAND = "git add .";
-const GIT_COMMIT_COMMAND = 'git commit -m "{message}"';
+const GIT_COMMIT_COMMAND = 'git commit -m "{message}" -m "{description}"';
 
 export const GitCommitTool = tool({
   name: "git_commit",
@@ -24,11 +24,13 @@ export const GitCommitTool = tool({
     "Commits the changes in the current git repository and writes a helpful commit message about what changed. Use the git_diff tool to get information about the changes.",
   parameters: {
     commit_message_header: z.string().max(72),
-    commit_message_info: z.string(),
+    commit_message_description: z.string(),
   },
-  implementation: ({ commit_message_header, commit_message_info }) => {
-    const finalMsg = commit_message_header + "\r\n\r\n" + commit_message_info;
-    const commitCmd = GIT_COMMIT_COMMAND.replace("{message}", finalMsg);
+  implementation: ({ commit_message_header, commit_message_description }) => {
+    const commitCmd = GIT_COMMIT_COMMAND.replace(
+      "{message}",
+      commit_message_header
+    ).replace("{description}", commit_message_description);
 
     useLogger().debug("[GitCommitTool] Commit message:", commitCmd);
 
