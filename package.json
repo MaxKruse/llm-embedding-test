@@ -5,8 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "setupdocker": "docker run -e ALLOW_RESET=TRUE --name chroma -d -p 8000:8000 chromadb/chroma",
-    "setupdata": "npx tsx src/main.ts add",
+    "setup": "docker run -e ALLOW_RESET=TRUE --name chroma -d -p 8000:8000 chromadb/chroma",
     "start": "npx tsx src/main.ts",
     "cleanup": "docker stop chroma && docker rm chroma"
   },
@@ -15,12 +14,15 @@
   "license": "ISC",
   "dependencies": {
     "@huggingface/transformers": "^3.3.3",
+    "@lmstudio/sdk": "^1.0.1",
     "chromadb": "^1.10.4",
     "chromadb-default-embed": "^2.13.2",
     "dotenv": "^16.4.7",
-    "openai": "^4.85.4",
+    "inquirer": "^12.4.2",
     "typescript": "^5.7.3",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0",
+    "zod": "^3.24.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

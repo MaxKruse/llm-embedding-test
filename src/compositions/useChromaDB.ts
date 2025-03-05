@@ -1,19 +1,12 @@
-import {
-  AddRecordsParams,
-  ChromaClient,
-  IncludeEnum,
-  Metadata,
-} from "chromadb";
-import OpenAI from "openai";
+import { AddRecordsParams, ChromaClient, Metadata } from "chromadb";
 import { sys } from "typescript";
-import "../util/env.js";
-import { Embedding, Embeddings } from "openai/resources/embeddings.mjs";
-import { KnowledgeIndexConfig } from "./tools/knowledge.js";
 import { AutoTokenizer } from "@huggingface/transformers";
 
 import "fs";
 import { writeFile } from "fs";
 import { v4 } from "uuid";
+import { EMBEDDING_MODEL } from "./useLMStudio.js";
+import { useLogger } from "./useLogger.js";
 
 // values for granite-embedding-278m-multilingual
 const MAX_EMBEDDING_TOKENS = 512;
@@ -25,23 +18,23 @@ const COLLECTION_NAME = "knowledge";
 const chromaClient = new ChromaClient();
 
 async function splitKnowledge(
-  config: AddEmbeddingParams
-): Promise<Array<AddEmbeddingParams>> {
-  const res: Array<AddEmbeddingParams> = [];
+  config: EmbeddingParams
+): Promise<Array<EmbeddingParams>> {
+  const res: Array<EmbeddingParams> = [];
 
   const tokenizer = await AutoTokenizer.from_pretrained(MODEL_PATH);
 
   const sentence_embedding = await tokenizer.encode(config.data);
-  console.log("Sentence embedding size is", sentence_embedding.length);
+  useLogger().debug("Sentence embedding size", sentence_embedding.length);
 
   if (sentence_embedding.length > MAX_EMBEDDING_TOKENS) {
     // cut up the knowledge
 
-    const keepSplitting = async (conf: AddEmbeddingParams) => {
+    const keepSplitting = async (conf: EmbeddingParams) => {
       const new_embedding = await tokenizer.encode(config.data);
 
-      console.log(
-        "Got new embedding size for the split part: ",
+      useLogger().debug(
+        "Got new embedding size for the split part",
         new_embedding.length
       );
 
@@ -50,7 +43,7 @@ async function splitKnowledge(
         return;
       }
 
-      const newParts: Array<AddEmbeddingParams> = [];
+      const newParts: Array<EmbeddingParams> = [];
 
       const splits = conf.data.split(".");
       for (const part of splits) {
@@ -74,17 +67,17 @@ async function splitKnowledge(
   return res;
 }
 
-export interface AddEmbeddingParams {
-  id: string;
+export interface EmbeddingParams {
+  id?: string;
   data: string;
-  metadata?: Metadata;
+  metadata: Metadata;
 }
 
 export async function useChromaDB() {
   const res = await chromaClient.heartbeat().catch((err: Error) => err);
 
   if (res instanceof Error) {
-    console.log("Error connecting to chromaDB: ", res);
+    useLogger().error("Error connecting to chromaDB", res);
     sys.exit(1);
     return;
   }
@@ -99,23 +92,17 @@ export async function useChromaDB() {
     },
   });
 
-  const addEmbedding = async (
-    params: AddEmbeddingParams,
-    openaiClient: OpenAI
-  ) => {
+  const addEmbedding = async (params: EmbeddingParams) => {
     const allParts = await splitKnowledge(params);
 
     for (const part of allParts) {
       // get embedding from openai
-      const embeddingData = await openaiClient.embeddings.create({
-        model: process.env.OPENAI_EMBEDDING_MODEL!,
-        input: part.data,
-      });
+      const embeddingData = await EMBEDDING_MODEL.embed(part.data);
 
       const chromaData: AddRecordsParams = {
-        ids: [part.id],
+        ids: [part.id ?? v4()],
         documents: [part.data],
-        embeddings: embeddingData.data.map((e) => e.embedding),
+        embeddings: [embeddingData.embedding],
       };
 
       if (part.metadata) {
@@ -127,19 +114,20 @@ export async function useChromaDB() {
   };
 
   const searchEmbedding = async (
-    config: KnowledgeIndexConfig,
-    openaiClient: OpenAI
+    config: EmbeddingParams
   ): Promise<Array<string>> => {
-    const embeddingData = await openaiClient.embeddings.create({
-      model: process.env.OPENAI_EMBEDDING_MODEL!,
-      input: config.information,
-    });
+    const embeddingData = await EMBEDDING_MODEL.embed(config.data);
 
     const queried = await collection.query({
       nResults: 10,
       // @ts-ignore
       includes: ["documents", "distances"],
-      queryEmbeddings: embeddingData.data.map((e) => e.embedding),
+      queryEmbeddings: [embeddingData.embedding],
+      where: {
+        type: {
+          $eq: config.metadata["type"] || "",
+        },
+      },
     });
 
     await writeFile(
@@ -163,9 +151,10 @@ export async function useChromaDB() {
           const currentDistance = currentSearchDistances?.at(j)!;
           const currentDocument = currentSearchDocuments?.at(j)!;
 
-          const tempString = `Information retrieved with ${
-            (1.0 - currentDistance) * 100
-          }% Confidence: ${currentDocument}`;
+          const tempString = `Information retrieved with ${(
+            (1.0 - currentDistance) *
+            100
+          ).toFixed(2)}% Confidence: ${currentDocument}`;
 
           resultStrings.push(tempString);
         }

@@ -1,104 +1,66 @@
-import OpenAI from "openai";
-import { AddEmbeddingParams, useChromaDB } from "../useChromaDB.js";
-import { Metadata } from "chromadb";
-import { v4 as uuidv4 } from "uuid";
-import { ChatCompletionTool } from "openai/resources/index.mjs";
+import { useChromaDB } from "../useChromaDB.js";
+import { tool } from "@lmstudio/sdk";
+import { z } from "zod";
+import { useLogger } from "../useLogger.js";
 
-export interface KnowledgeIndexConfig {
-  information: string;
-  metaData?: Metadata;
-}
+const InformationCategoryEnum = z.enum([
+  "hardware",
+  "software",
+  "games",
+  "personal",
+  "hobby",
+  "health",
+]);
 
-export interface RetrievedKnowledge {
-  information: Array<string>;
-}
+export const LearnNewInformationTool = tool({
+  name: "learn_new_information",
+  description:
+    "Learns a new piece of information by using an embedding model and saving it to a vector database. This always has to come AFTER looking up existing information to avoid duplication. Information has to be stored as 'The user...'",
+  parameters: {
+    information: z.string(),
+    metaData: InformationCategoryEnum,
+  },
+  implementation: async ({ information, metaData }) => {
+    useLogger().debug("[LearnNewInformationTool]", { information, metaData });
 
-export async function IndexKnowledgeTool(
-  config: KnowledgeIndexConfig,
-  openaiClient: OpenAI
-): Promise<boolean> {
-  // todo: chromadb save knowledge as vector
+    const chroma = await useChromaDB();
 
-  const chroma = await useChromaDB();
-  const embeddingData: AddEmbeddingParams = {
-    id: uuidv4(),
-    data: config.information,
-    metadata: config.metaData,
-  };
-
-  await chroma!.addEmbedding(embeddingData, openaiClient);
-
-  return true;
-}
-
-export async function RetrieveKnowledgeTool(
-  config: KnowledgeIndexConfig,
-  openaiClient: OpenAI
-): Promise<RetrievedKnowledge> {
-  // todo: search in chromadb for knowledge based on the config, if we cant find it return false, prompting the llm to save the data with the next tool call.
-
-  const chroma = await useChromaDB();
-  console.log("Looking for data:", config.information);
-
-  const data = await chroma!.searchEmbedding(config, openaiClient);
-  console.log("Found data:", data);
-  return {
-    information: data,
-  };
-}
-
-export function knowledge(): Array<ChatCompletionTool> {
-  const tools: Array<ChatCompletionTool> = [];
-
-  tools.push({
-    type: "function",
-    function: {
-      name: "remember_knowledge",
-      description:
-        "Remembers a previously learned piece of information about the user. This has to be used before learning something new. Always.",
-      strict: true,
-      parameters: {
-        type: "object",
-        properties: {
-          information: {
-            type: "string",
-            description: "The piece of information to remember about the user.",
-          },
-        },
-        required: ["information"],
-        additionalProperties: false,
+    chroma?.addEmbedding({
+      data: information,
+      metadata: {
+        type: metaData,
       },
-    },
-  });
+    });
 
-  tools.push({
-    type: "function",
-    function: {
-      name: "learn_knowledge",
-      description: "Learns a new piece of information about the user.",
-      strict: true,
-      parameters: {
-        type: "object",
-        properties: {
-          information: {
-            type: "string",
-            description: "The piece of information to learn about the user.",
-          },
-          metaData: {
-            type: "object",
-            properties: {
-              type: {
-                type: "string",
-                enum: ["hardware", "software", "games"],
-              },
-            },
-          },
-        },
-        required: ["information"],
-        additionalProperties: false,
+    return "Learned and Saved new information to vector database.";
+  },
+});
+
+export const SearchExistingInformationTool = tool({
+  name: "search_existing_information",
+  description:
+    "Searched the vector database for an existing piece of information. This always has to come BEFORE learning new information to avoid duplication. Information has to be searched either by metadata information or 'The user...'",
+  parameters: {
+    information: z.string(),
+    metaData: InformationCategoryEnum,
+  },
+  implementation: async ({ information, metaData }) => {
+    useLogger().debug("[SearchExistingInformationTool]", {
+      information,
+      metaData,
+    });
+    const chroma = await useChromaDB();
+
+    const found = await chroma?.searchEmbedding({
+      data: information,
+      metadata: {
+        type: metaData,
       },
-    },
-  });
+    });
 
-  return tools;
-}
+    return `#Results:
+    
+     - ${found?.join("\n - ")}
+    `;
+  },
+});
