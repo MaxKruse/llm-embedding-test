@@ -23,8 +23,13 @@ export const GitCommitTool = tool({
   description:
     "Commits the changes in the current git repository and writes a helpful commit message about what changed. Use the git_diff tool to get information about the changes.",
   parameters: {
-    commit_message_header: z.string().max(72),
-    commit_message_description: z.string(),
+    commit_message_header: z
+      .string()
+      .max(72)
+      .describe("The broad overview summarization of what changed"),
+    commit_message_description: z
+      .string()
+      .describe("Bulletpoints of what changed for what reason"),
   },
   implementation: ({ commit_message_header, commit_message_description }) => {
     const commitCmd = GIT_COMMIT_COMMAND.replace(
