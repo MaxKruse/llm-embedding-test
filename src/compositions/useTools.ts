@@ -1,4 +1,9 @@
 import {
+  CurrentDirectoryTool,
+  DirectoryListTool,
+} from "./tools/directories.js";
+import { ReadFileTool, WriteFileTool } from "./tools/files.js";
+import {
   GitCommitTool,
   GitDiffTool,
   GitPushTool,
@@ -17,5 +22,9 @@ export function getKnowledgeTools() {
     GitCommitTool,
     GitPushTool,
     GitStatusTool,
+    ReadFileTool,
+    WriteFileTool,
+    DirectoryListTool,
+    CurrentDirectoryTool,
   ];
 }
