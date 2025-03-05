@@ -3,6 +3,11 @@ import { useLMStudio } from "./compositions/useLMStudio.js";
 
 const lmStudio = await useLMStudio();
 
+process.on("SIGINT", () => {
+  console.log("\nExiting gracefully...");
+  process.exit(0);
+});
+
 while (true) {
   const input = await inquirer.prompt([
     {
