@@ -15,6 +15,7 @@
   "dependencies": {
     "@huggingface/transformers": "^3.3.3",
     "@lmstudio/sdk": "^1.0.1",
+    "child_process": "^1.0.2",
     "chromadb": "^1.10.4",
     "chromadb-default-embed": "^2.13.2",
     "dotenv": "^16.4.7",

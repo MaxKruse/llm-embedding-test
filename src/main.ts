@@ -3,19 +3,27 @@ import { useLMStudio } from "./compositions/useLMStudio.js";
 
 const lmStudio = await useLMStudio();
 
-process.on("SIGINT", () => {
+function exitFunc() {
   console.log("\nExiting gracefully...");
   process.exit(0);
-});
+}
+
+process.on("SIGINT", exitFunc);
 
 while (true) {
-  const input = await inquirer.prompt([
-    {
-      type: "input",
-      name: "chat_input",
-      message: "Chat with the AI Agent: >",
-    },
-  ]);
+  const input = await inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "chat_input",
+        message: "Chat with the AI Agent: >",
+      },
+    ])
+    .catch((e) => exitFunc());
+
+  if (input?.chat_input === undefined) {
+    break;
+  }
 
   const resp = await lmStudio.act({ input: input.chat_input });
   console.log(resp + "\n\n");

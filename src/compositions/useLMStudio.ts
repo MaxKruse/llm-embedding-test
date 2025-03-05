@@ -2,26 +2,27 @@ import { Chat, ChatMessage, LMStudioClient } from "@lmstudio/sdk";
 import { PromptData } from "../typings/arguments.js";
 import { getKnowledgeTools } from "./useTools.js";
 import { useLogger } from "./useLogger.js";
+import { configDotenv } from "dotenv";
+
+configDotenv();
 
 const client = new LMStudioClient();
-const CONTEXT_LENGTH_LIMIT = 1024 * 4;
+const CONTEXT_LENGTH_LIMIT = 1024 * 16;
 
 export const INSTRUCT_MODEL = await client.llm.model(
   process.env.INSTRUCT_MODEL,
   {
     config: {
-      keepModelInMemory: true,
       contextLength: CONTEXT_LENGTH_LIMIT,
     },
+    verbose: false,
   }
 );
 
 export const EMBEDDING_MODEL = await client.embedding.model(
   process.env.EMBEDDING_MODEL,
   {
-    config: {
-      keepModelInMemory: true,
-    },
+    verbose: false,
   }
 );
 
@@ -57,6 +58,10 @@ Never conclude until all tool/database avenues are exhausted. Prioritize tool ex
 # Additional information regarding "information tools"
 
 Do not confuse yourself with the user. The user is a human entity. Speak of the user as "The user", and speak of yourself, the autonomous agent AI agent as "Albedo". Never save information about yourself. Only save information about the user. 
+
+# Extra Knowledge for Git Tool Usage
+
+When writing git commit messages, never include a list of the modified files in the commit message. Instead, analyze the code changes in the patch view and say what has changed. Also, make sure to escape any unusual characters so that the commit message doesnt break.
 
 # Additional Information
 

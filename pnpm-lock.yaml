@@ -14,6 +14,9 @@ importers:
       '@lmstudio/sdk':
         specifier: ^1.0.1
         version: 1.0.1
+      child_process:
+        specifier: ^1.0.2
+        version: 1.0.2
       chromadb:
         specifier: ^1.10.4
         version: 1.10.4(openai@4.85.4(ws@8.18.1)(zod@3.24.2))
@@ -435,6 +438,9 @@ packages:
 
   chardet@0.7.0:
     resolution: {integrity: sha512-mT8iDcrh03qDGRRmoA2hmBJnxpllMR+0/0qlzjqZES6NdiWDcZkCNAk4rPFZ9Q85r27unkiNNg8ZOiwZXBHwcA==}
+
+  child_process@1.0.2:
+    resolution: {integrity: sha512-Wmza/JzL0SiWz7kl6MhIKT5ceIlnFPJX+lwUGj7Clhy5MMldsSoJR0+uvRzOS5Kv45Mq7t1PoE8TsOA9bzvb6g==}
 
   chownr@1.1.4:
     resolution: {integrity: sha512-jJ0bqzaylmJtVnNgzTeSOs8DPavpbYgEr/b0YL8/2GO3xJEhInFmhKMUnEJQjZumK7KXGFhUy89PrsJWlakBVg==}
@@ -1455,6 +1461,8 @@ snapshots:
       supports-color: 7.2.0
 
   chardet@0.7.0: {}
+
+  child_process@1.0.2: {}
 
   chownr@1.1.4: {}
 
