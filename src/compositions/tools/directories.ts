@@ -15,14 +15,17 @@ export const DirectoryListTool = tool({
       ),
   },
   implementation: ({ directoryPath }) => {
-    return fs.readdirSync(directoryPath, "utf-8");
+    return fs.readdirSync(directoryPath, {
+      encoding: "utf-8",
+      withFileTypes: true,
+    });
   },
 });
 
 export const CurrentDirectoryTool = tool({
   name: "current_directory",
   description:
-    "Gets the current directory path. Generally used before any other file or directory related tools.",
+    "Get the current directory. ALWAYS used before any other file or directory related tools.",
   parameters: {},
   implementation: () => {
     return process.cwd();
