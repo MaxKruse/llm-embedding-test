@@ -1,13 +1,11 @@
 import winston, { error, info, LeveledLogMethod } from "winston";
 
 const logger = winston.createLogger({
-  level: "info",
+  level: "debug",
   format: winston.format.simple(),
   transports: [
-    new winston.transports.Console({}),
     new winston.transports.File({
       filename: `logs/agent.log`,
-      level: "debug",
     }),
   ],
 });

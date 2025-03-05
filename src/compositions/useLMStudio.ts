@@ -1,6 +1,7 @@
 import { Chat, ChatMessage, LMStudioClient } from "@lmstudio/sdk";
 import { PromptData } from "../typings/arguments.js";
 import { getKnowledgeTools } from "./useTools.js";
+import { useLogger } from "./useLogger.js";
 
 const client = new LMStudioClient();
 
@@ -48,6 +49,7 @@ export async function useLMStudio() {
 
     let finalMessage: string =
       "Something went wrong if you see this... Check LM Studio Logs.";
+    useLogger().debug("Using context:", actChat);
 
     const finalResult = await INSTRUCT_MODEL.act(
       actChat,
@@ -55,10 +57,13 @@ export async function useLMStudio() {
       {
         onMessage: (message) => {
           finalMessage = message.toString();
+          actChat.append(message);
         },
         temperature: 0.3,
       }
     );
+
+    useLogger().info("Last response:", finalMessage);
 
     return { finalResult, finalMessage };
   };
