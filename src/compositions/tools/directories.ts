@@ -2,6 +2,7 @@ import { tool } from "@lmstudio/sdk";
 import { z } from "zod";
 import fs from "fs";
 import path from "path";
+import { useLogger } from "../useLogger.js";
 
 export const DirectoryListTool = tool({
   name: "list_directory_content",
@@ -15,10 +16,13 @@ export const DirectoryListTool = tool({
       ),
   },
   implementation: ({ directoryPath }) => {
-    return fs.readdirSync(directoryPath, {
+    const data = fs.readdirSync(directoryPath, {
       encoding: "utf-8",
       withFileTypes: true,
     });
+    useLogger().debug("[DirectoryListTool] listing directory contents", data);
+
+    return data;
   },
 });
 
