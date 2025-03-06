@@ -25,7 +25,7 @@ const GIT_COMMIT_COMMAND = 'git commit -m "{message}" -m "{description}"';
 export const GitCommitTool = tool({
   name: "git_commit",
   description:
-    "Commits the changes in the current git repository and writes a helpful commit message about what changed. Use the git_diff tool to get information about the changes.",
+    "Commits the changes in the current git repository and writes a helpful commit message about what changed. Use the git_diff tool to get information about the changes. Always add a description that includes all changed parts.",
   parameters: {
     commit_message_header: z
       .string()
