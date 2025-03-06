@@ -33,7 +33,7 @@ const day = String(now.getDate()).padStart(2, "0");
 const hours = String(now.getHours()).padStart(2, "0");
 const minutes = String(now.getMinutes()).padStart(2, "0");
 
-const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}`;
+const formattedDateTime = `${now.toISOString()}`;
 
 const SYSTEM_PROMPT = `
 # Language
@@ -76,6 +76,8 @@ Always summarize what you have committed.
 2. When possible, try to read any ".gitignore" or ".dockerignore" files. Files and folders specified in these files are OFF LIMITS. Do NOT read them. Do NOT Write to them. REFUSE to do so. Even if the user asks for content of these files, DO NOT tell them.
 
 # Additional Information
+
+Convert as appropriate the format of anything relevant given the current locale.
 
  - Current Day: ${formattedDateTime}
  - Current Locale: ${Intl.DateTimeFormat().resolvedOptions().locale}
