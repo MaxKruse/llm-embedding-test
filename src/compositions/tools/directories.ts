@@ -21,16 +21,18 @@ export const DirectoryListTool = tool({
       encoding: "utf-8",
       withFileTypes: true,
     });
-    useLogger().debug("[DirectoryListTool] listing directory contents", data);
 
-    return data.map((entry) => {
+    const final = data.map((entry) => {
       return {
         isFile: entry.isFile(),
         isDirectory: entry.isDirectory(),
         name: entry.name,
-        parentPath: entry.parentPath,
       };
     });
+
+    useLogger().debug("[DirectoryListTool] listing directory contents", final);
+
+    return final;
   },
 });
 

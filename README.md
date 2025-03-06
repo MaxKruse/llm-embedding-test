@@ -1,31 +1,15 @@
 # Project Overview
 
-## Introduction
+This project implements an AI assistant named Albedo, designed to solve queries through iterative tool usage. The system uses LMStudio for language model interactions and ChromaDB for embedding knowledge.
 
-This project is designed to provide a robust and modular framework for building AI-driven applications. It leverages modern software engineering practices, including dependency injection, compositionality, and state management, to ensure flexibility and maintainability.
+Key components:
 
-## Key Components
+- `main.ts`: Entry point that sets up the environment and starts a chat loop with Albedo.
+- `useChromaDB.ts`: Manages interactions with ChromaDB for knowledge embedding and retrieval.
+- `useLMStudio.ts`: Configures and interacts with LMStudio's language model and embedding services.
+- `useLogger.ts`: Sets up logging functionality using winston.
+- `useTools.ts`: Aggregates all tools used by the system.
 
-### Main Entry Point: `src/main.ts`
+The assistant strictly communicates in English, adheres to specific personality guidelines, safety rules, and operational procedures. It also includes additional information about file and directory usage conventions.
 
-The main entry point of the application initializes the core components and sets up the environment for running the application. This file is responsible for bootstrapping the entire project and ensuring that all necessary dependencies are loaded correctly.
-
-### Dependency Management: `package.json`
-
-This file manages the project's dependencies, including both development and production packages. It ensures that all required libraries and tools are installed and configured properly.
-
-### ChromaDB Integration: `src/compositions/useChromaDB.ts`
-
-The `useChromaDB` composition provides an interface for integrating with ChromaDB, a powerful vector database system. This integration allows the application to efficiently store, retrieve, and manage large volumes of data in a structured manner.
-
-### Tool Composition: `src/compositions/useTools.ts`
-
-The `useTools` composition offers a set of pre-defined tools that can be easily integrated into the application. These tools include functionalities for text processing, data manipulation, and more, making it easier to extend and customize the application as needed.
-
-### Language Model Studio Integration: `src/compositions/useLMStudio.ts`
-
-The `useLMStudio` composition provides an interface for integrating with LM Studio, a tool designed for working with large language models. This integration enables seamless interaction with various AI models, facilitating advanced text generation and analysis tasks.
-
-## Conclusion
-
-This project is a comprehensive framework that combines robust data management, flexible tooling, and powerful AI capabilities to create sophisticated applications. The modular design ensures that the application can be easily extended and customized to meet specific requirements.
+**Note**: supernova-medius and qwen2.5b-7b-instruct are observed to have the best performance as the instruct models.
