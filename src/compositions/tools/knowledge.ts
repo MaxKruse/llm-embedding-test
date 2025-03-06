@@ -23,22 +23,31 @@ export const LearnNewInformationTool = tool({
   implementation: async ({ information, metaData }) => {
     useLogger().debug("[LearnNewInformationTool]", { information, metaData });
 
-    const chroma = await useChromaDB();
+    try {
+      const chroma = await useChromaDB();
 
-    chroma?.addEmbedding({
-      data: information,
-      metadata: {
-        type: metaData,
-      },
-    });
+      chroma?.addEmbedding({
+        data: information,
+        metadata: {
+          type: metaData,
+        },
+      });
 
-    return {
-      status: "Learned and Saved new information to vector database.",
-      data: {
-        information,
-        metaData,
-      },
-    };
+      return {
+        status: "Learned and Saved new information to vector database.",
+        data: {
+          information,
+          metaData,
+        },
+      };
+    } catch (e: any) {
+      return {
+        status: "error",
+        name: e.name,
+        stack: e.stack,
+        msg: e.message,
+      };
+    }
   },
 });
 
@@ -55,18 +64,28 @@ export const SearchExistingInformationTool = tool({
       information,
       metaData,
     });
-    const chroma = await useChromaDB();
 
-    const found = await chroma?.searchEmbedding({
-      data: information,
-      metadata: {
-        type: metaData,
-      },
-    });
+    try {
+      const chroma = await useChromaDB();
 
-    return `#Results:
+      const found = await chroma?.searchEmbedding({
+        data: information,
+        metadata: {
+          type: metaData,
+        },
+      });
+
+      return `#Results:
     
      - ${found?.join("\n - ")}
     `;
+    } catch (e: any) {
+      return {
+        status: "error",
+        name: e.name,
+        stack: e.stack,
+        msg: e.message,
+      };
+    }
   },
 });
