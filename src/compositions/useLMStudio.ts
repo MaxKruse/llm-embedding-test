@@ -7,7 +7,7 @@ import { configDotenv } from "dotenv";
 configDotenv();
 
 const client = new LMStudioClient();
-const CONTEXT_LENGTH_LIMIT = 1024 * 4;
+const CONTEXT_LENGTH_LIMIT = 1024 * 8;
 
 export const INSTRUCT_MODEL = await client.llm.model(
   process.env.INSTRUCT_MODEL,
