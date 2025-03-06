@@ -1,5 +1,8 @@
 import inquirer from "inquirer";
 import { useLMStudio } from "./compositions/useLMStudio.js";
+import { SetRootDir } from "./compositions/useConfig.js";
+
+SetRootDir(process.argv.length == 3 ? process.argv[2] : undefined);
 
 const lmStudio = await useLMStudio();
 

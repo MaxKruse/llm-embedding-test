@@ -3,6 +3,7 @@ import { z } from "zod";
 import fs from "fs";
 import path from "path";
 import { useLogger } from "../useLogger.js";
+import { useConfig } from "../useConfig.js";
 
 export const DirectoryListTool = tool({
   name: "list_directory_content",
@@ -36,9 +37,14 @@ export const DirectoryListTool = tool({
 export const CurrentDirectoryTool = tool({
   name: "current_directory",
   description:
-    "Get the current directory. ALWAYS used before any other file or directory related tools.",
+    "Get the current directory. ALWAYS used before any other file, directory or git related tools.",
   parameters: {},
   implementation: () => {
-    return { currentDirectory: process.cwd() };
+    const config = useConfig();
+    let root = process.cwd();
+    if (config.RootDir) {
+      root = config.RootDir;
+    }
+    return { currentDirectory: root };
   },
 });
