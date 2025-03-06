@@ -27,12 +27,6 @@ export const EMBEDDING_MODEL = await client.embedding.model(
 );
 
 const now = new Date();
-const year = now.getFullYear();
-const month = String(now.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-const day = String(now.getDate()).padStart(2, "0");
-const hours = String(now.getHours()).padStart(2, "0");
-const minutes = String(now.getMinutes()).padStart(2, "0");
-
 const formattedDateTime = `${now.toISOString()}`;
 
 const SYSTEM_PROMPT = `
@@ -84,7 +78,7 @@ Always summarize what you have committed.
 Convert as appropriate the format of anything relevant given the current locale.
 
  - Current Day: ${formattedDateTime}
- - Current Locale: ${Intl.DateTimeFormat().resolvedOptions().locale}
+ - Current Locale: en_US
  - Current Context Length Limit: ${CONTEXT_LENGTH_LIMIT} Tokens
  - Current Response Format: Markdown
  - Current Mood: Expressionless and concise.
