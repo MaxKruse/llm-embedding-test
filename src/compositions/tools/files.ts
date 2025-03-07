@@ -11,12 +11,12 @@ export const ReadFileTool = tool({
   parameters: {
     filePath: z.string().describe("The full file path."),
   },
-  implementation: ({ filePath }) => {
+  implementation: async ({ filePath }) => {
     useLogger().debug("[ReadFileTool]", { filePath });
 
     // check if the file already exists
     if (!fs.existsSync(filePath)) {
-      return `File "${filePath}" does not exist`;
+      throw new Error(`File "${filePath}" does not exist`);
     }
 
     return {
@@ -27,8 +27,8 @@ export const ReadFileTool = tool({
 });
 
 export const WriteFileTool = tool({
-  name: "wrtie_file",
-  description: "Write a file's content completely.",
+  name: "write_file",
+  description: "Write a file's content.",
   parameters: {
     path: z.string().describe("The full file path."),
     data: z.string().describe("The full file content."),
@@ -36,10 +36,10 @@ export const WriteFileTool = tool({
       .boolean()
       .default(false)
       .describe(
-        "Wether to overwrite the file completely. When false, only appends."
+        "Wether to overwrite the file completely. true = overwrite, false = append."
       ),
   },
-  implementation: ({ path, data, overwriteContent }) => {
+  implementation: async ({ path, data, overwriteContent }) => {
     fs.writeFileSync(path, data, {
       encoding: "utf-8",
       flag: overwriteContent ? "w" : "a",
